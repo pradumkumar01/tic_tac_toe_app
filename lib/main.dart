@@ -1,61 +1,45 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:tic_tac_app/screen/ui/guest_login_screen.dart';
 
-void main() {
-  runApp(MyApp());
-}
+void main() => runApp(TicTacToeProApp());
 
-class MyApp extends StatelessWidget {
+class TicTacToeProApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: SplashScreen(),
+      title: 'Tic-Tac-Toe Pro',
       debugShowCheckedModeBanner: false,
+      routes: {
+        '/login': (_) => GuestLoginScreen(),
+      },
+      home: SplashScreen(),
     );
   }
 }
 
 class SplashScreen extends StatefulWidget {
   @override
-  _SplashScreenState createState() => _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 2), () {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => GuestLoginScreen()),
-      );
-    });
+    Future.delayed(const Duration(seconds: 2), _navigate);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset('assets/logo.png', height: 120),
-            const SizedBox(height: 20),
-            const Text("Tic-Tac-Toe Pro", style: TextStyle(fontSize: 22)),
-            const SizedBox(height: 30),
-            const CircularProgressIndicator(),
-          ],
-        ),
-      ),
+  void _navigate() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => GuestLoginScreen()),
     );
   }
-}
 
-class GuestLoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(child: Text("Guest Login Screen Placeholder")),
+      body: Center(child: Text("Tic-Tac-Toe Pro", style: TextStyle(fontSize: 28))),
     );
   }
 }

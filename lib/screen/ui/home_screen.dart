@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'tic_tac_toe_home.dart';
+import 'package:tic_tac_app/screen/home_navigation.dart';
+import 'package:tic_tac_app/screen/tic_tac_toe_home.dart';
 
 class HomeScreen extends StatelessWidget {
   final String username;
@@ -28,13 +29,15 @@ class HomeScreen extends StatelessWidget {
         child: ElevatedButton(
           child: Text('Play Tic-Tac-Toe'),
           onPressed: () {
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(builder: (_) => TicTacToeHomePage()),
-            // );
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => TicTacToeHomePage(playerName: username)),
+            );
           },
         ),
+
       ),
+      bottomNavigationBar: HomeNavigation(username: username),
     );
   }
 }
