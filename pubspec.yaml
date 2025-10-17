@@ -36,6 +36,12 @@ dependencies:
   cupertino_icons: ^1.0.8
   provider: 
   shared_preferences:
+  sqflite:
+  path_provider: 
+  path: 
+  shimmer:
+  fl_chart: 
+  flutter_animate:
 
 dev_dependencies:
   flutter_native_splash: ^2.3.8
@@ -100,3 +106,8 @@ flutter_native_splash:
     icon_background_color: "#ffffff"
     branding: assets/branding.png
   web: false
+
+dependency_overrides:
+  # fl_chart 1.1.0 expects newer vector_math APIs (translateByDouble/scaleByDouble).
+  # Force a newer vector_math version that provides those methods.
+  vector_math: ^2.1.5
