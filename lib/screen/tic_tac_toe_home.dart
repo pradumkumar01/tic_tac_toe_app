@@ -9,18 +9,26 @@ class TicTacToeHomePage extends StatefulWidget {
   State<TicTacToeHomePage> createState() => _TicTacToeHomePageState();
 }
 
-class _TicTacToeHomePageState extends State<TicTacToeHomePage> {
+class _TicTacToeHomePageState extends State<TicTacToeHomePage>
+    with SingleTickerProviderStateMixin {
   static const int gridSize = 3;
   List<List<String>> _board = [];
   String _currentPlayer = "X";
   String? _winner;
   bool _draw = false;
   final db = DatabaseHelper();
+  late AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
     _initGame();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+      lowerBound: 0.9,
+      upperBound: 1.1,
+    );
   }
 
   void _initGame() {
@@ -34,6 +42,7 @@ class _TicTacToeHomePageState extends State<TicTacToeHomePage> {
     if (_board[row][col] == "" && _winner == null) {
       setState(() {
         _board[row][col] = _currentPlayer;
+        _controller.forward(from: 0.9);
         _checkWinner();
         if (_winner == null && !_draw) {
           _currentPlayer = _currentPlayer == "X" ? "O" : "X";
@@ -60,11 +69,7 @@ class _TicTacToeHomePageState extends State<TicTacToeHomePage> {
       String c = _board[w[4]][w[5]];
       if (a != "" && a == b && b == c) {
         setState(() => _winner = a);
-        if (_winner == "X") {
-          await db.insertOrUpdatePlayer(widget.playerName, win: true);
-        } else {
-          await db.insertOrUpdatePlayer(widget.playerName, win: false);
-        }
+        await db.insertOrUpdatePlayer(widget.playerName, win: _winner == "X");
         return;
       }
     }
@@ -73,40 +78,36 @@ class _TicTacToeHomePageState extends State<TicTacToeHomePage> {
       setState(() => _draw = true);
       await db.insertOrUpdatePlayer(widget.playerName, draw: true);
     }
-    if (_winner != null) {
-      if (_winner == widget.playerName) {
-        await db.insertOrUpdatePlayer(widget.playerName, win: true);
-      } else {
-        await db.insertOrUpdatePlayer(widget.playerName, win: false);
-      }
-    } else if (_draw) {
-      await db.insertOrUpdatePlayer(widget.playerName, draw: true);
-    }
   }
 
- 
-
   void _restartGame() {
-    setState(() {
-      _initGame();
-    });
+    setState(_initGame);
   }
 
   Widget _buildCell(int i, int j) {
-    return GestureDetector(
-      onTap: () => _handleTap(i, j),
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.black54, width: 1),
-          color: Colors.white,
-        ),
-        child: Center(
-          child: Text(
-            _board[i][j],
-            style: TextStyle(
-              fontSize: 40,
-              fontWeight: FontWeight.bold,
-              color: _board[i][j] == "X" ? Colors.deepPurple : Colors.orange,
+    return ScaleTransition(
+      scale: Tween<double>(begin: 1.0, end: 1.0).animate(_controller),
+      child: GestureDetector(
+        onTap: () => _handleTap(i, j),
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.black12, width: 1),
+            color: Colors.white70,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Center(
+            child: AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
+              style: TextStyle(
+                fontSize: 48,
+                fontWeight: FontWeight.bold,
+                color: _board[i][j] == "X"
+                    ? Colors.pinkAccent
+                    : _board[i][j] == "O"
+                        ? Colors.amberAccent
+                        : Colors.transparent,
+              ),
+              child: Text(_board[i][j]),
             ),
           ),
         ),
@@ -117,40 +118,78 @@ class _TicTacToeHomePageState extends State<TicTacToeHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Tic-Tac-Toe")),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              _winner != null
-                  ? "Winner: $_winner"
-                  : _draw
-                      ? "It's a Draw!"
-                      : "Turn: $_currentPlayer",
-              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              width: 320,
-              height: 320,
-              child: GridView.builder(
-                itemCount: 9,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3),
-                itemBuilder: (context, idx) {
-                  int i = idx ~/ 3;
-                  int j = idx % 3;
-                  return _buildCell(i, j);
-                },
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        centerTitle: true,
+        title: const Text("Tic-Tac-Toe Pro",
+        style: TextStyle(color: Colors.indigo
+        ),
+          ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFe3f2fd), Color(0xFFbbdefb)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                _winner != null
+                    ? "Winner: $_winner 🎉"
+                    : _draw
+                        ? "It's a Draw! 🤝"
+                        : "Turn: $_currentPlayer",
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.indigo,
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _restartGame,
-              child: const Text("Restart Game"),
-            ),
-          ],
+              const SizedBox(height: 20),
+              Container(
+                width: 320,
+                height: 320,
+                decoration: BoxDecoration(
+                  // color: Colors.black26,
+                  borderRadius: BorderRadius.circular(12),
+                 
+                ),
+                child: GridView.builder(
+                  itemCount: 9,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3),
+                  itemBuilder: (context, idx) {
+                    int i = idx ~/ 3;
+                    int j = idx % 3;
+                    return _buildCell(i, j);
+                  },
+                ),
+              ),
+              const SizedBox(height: 25),
+              ElevatedButton.icon(
+                onPressed: _restartGame,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurpleAccent,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                icon: const Icon(Icons.refresh, color: Colors.white),
+                label: const Text(
+                  "Restart Game",
+                  style: TextStyle(fontSize: 18, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
