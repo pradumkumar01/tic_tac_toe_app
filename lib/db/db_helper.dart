@@ -9,11 +9,11 @@ class DatabaseHelper {
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDatabase();
+    _database = await _openDB();
     return _database!;
   }
 
-  Future<Database> _initDatabase() async {
+  Future<Database> _openDB() async {
     Directory dir = await getApplicationDocumentsDirectory();
     String path = join(dir.path, 'tictactoe.db');
     return await openDatabase(path, version: 1, onCreate: _createDB);
